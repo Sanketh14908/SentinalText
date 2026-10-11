@@ -1,3 +1,5 @@
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 require('dotenv').config();
 
 // ─── Startup env-var validation ───────────────────────────────────────────────
@@ -13,9 +15,11 @@ const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]);
 if (missingEnv.length > 0) {
   console.error(
     `[STARTUP ERROR] Missing required environment variables: ${missingEnv.join(', ')}\n` +
-    'Server will not start. Please set them in your .env file.'
+    'Please set them in your environment variables.'
   );
-  process.exit(1);
+  if (!process.env.VERCEL) {
+    process.exit(1);
+  }
 }
 
 const express = require('express');
@@ -92,8 +96,10 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start server ─────────────────────────────────────────────────────────────
-// Bind to 0.0.0.0 (all interfaces) so the server is reachable on both
-// IPv4 (127.0.0.1) and IPv6 (::1), and from the local network.
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on http://0.0.0.0:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on http://0.0.0.0:${PORT}`);
+  });
+}
+
+module.exports = app;
