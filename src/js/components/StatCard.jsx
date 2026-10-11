@@ -1,40 +1,82 @@
 export default function StatCard({ title, value, subtitle, icon: Icon, valueClassName }) {
-  let iconBgClass = "from-indigo-500/20 to-cyan-500/20";
-  let iconColorClass = "text-indigo-600 dark:text-cyan-400";
+  let theme = {
+    bg: "bg-white dark:bg-[#121212]",
+    badgeBg: "bg-[#00f0ff] text-black",
+    iconBg: "bg-[#00f0ff] text-black",
+    shadow: "shadow-brutal-cyan",
+    sticker: "⚡ DATA",
+  };
   
-  if (title.toLowerCase().includes('flagged')) {
-    iconBgClass = "from-amber-500/20 to-orange-500/20";
-    iconColorClass = "text-amber-600 dark:text-amber-400";
-  } else if (title.toLowerCase().includes('common')) {
-    iconBgClass = "from-rose-500/20 to-red-500/20";
-    iconColorClass = "text-rose-600 dark:text-rose-400";
+  const lowerTitle = (title || '').toLowerCase();
+
+  if (lowerTitle.includes('flagged') || lowerTitle.includes('risk')) {
+    theme = {
+      bg: "bg-white dark:bg-[#121212]",
+      badgeBg: "bg-[#ff007f] text-white",
+      iconBg: "bg-[#ff007f] text-white",
+      shadow: "shadow-brutal-pink",
+      sticker: "🚨 ALERT",
+    };
+  } else if (lowerTitle.includes('common') || lowerTitle.includes('red flag')) {
+    theme = {
+      bg: "bg-white dark:bg-[#121212]",
+      badgeBg: "bg-[#ffe600] text-black",
+      iconBg: "bg-[#ffe600] text-black",
+      shadow: "shadow-brutal-yellow",
+      sticker: "⚠️ TOP THREAT",
+    };
+  } else if (lowerTitle.includes('total') || lowerTitle.includes('scans')) {
+    theme = {
+      bg: "bg-white dark:bg-[#121212]",
+      badgeBg: "bg-[#00ff66] text-black",
+      iconBg: "bg-[#00ff66] text-black",
+      shadow: "shadow-brutal-lime",
+      sticker: "📊 TOTAL",
+    };
   }
 
   const isLong = typeof value === 'string' && value.length > 12;
   const computedValueClass = valueClassName || (
     isLong
-      ? "text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-snug break-words"
-      : "text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight"
+      ? "text-base sm:text-lg font-space font-black text-black dark:text-white leading-snug break-words"
+      : "text-3xl sm:text-5xl font-syne font-black text-black dark:text-white tracking-tight"
   );
 
   return (
-    <div className="bg-white dark:bg-white/10 backdrop-blur-xl border border-slate-200/80 dark:border-white/10 rounded-3xl p-6 shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:shadow-md dark:hover:shadow-[0_16px_48px_rgba(0,0,0,0.3)] transition-all duration-300 flex flex-col justify-between h-full">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <p className="text-slate-600 dark:text-slate-400 text-sm font-semibold mb-2">{title}</p>
-          <h3 className={computedValueClass} title={typeof value === 'string' ? value : undefined}>
-            {value || 'None'}
-          </h3>
-          {subtitle && (
-            <p className="text-slate-600 dark:text-slate-400 text-xs sm:text-sm mt-3 bg-slate-100 dark:bg-white/5 inline-block px-3 py-1 rounded-lg border border-slate-200 dark:border-white/5 font-medium">
-              {subtitle}
-            </p>
-          )}
+    <div className={`${theme.bg} border-3 border-black dark:border-white rounded-3xl p-6 ${theme.shadow} hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between h-full relative overflow-hidden group`}>
+      
+      {/* Top sticker & title */}
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <span className={`inline-block px-2.5 py-0.5 rounded-md font-mono-code text-[11px] font-black uppercase border border-black shadow-[1.5px_1.5px_0px_#000] mb-2 ${theme.badgeBg}`}>
+            {theme.sticker}
+          </span>
+          <p className="font-space font-bold text-xs sm:text-sm uppercase tracking-wider text-black/70 dark:text-gray-300">
+            {title}
+          </p>
         </div>
-        <div className={`w-14 h-14 shrink-0 rounded-2xl flex items-center justify-center bg-gradient-to-br ${iconBgClass} ${iconColorClass} shadow-inner`}>
-           <Icon className="w-7 h-7" />
+
+        <div className={`w-12 h-12 shrink-0 rounded-2xl flex items-center justify-center border-2 border-black shadow-[3px_3px_0px_#000] ${theme.iconBg} group-hover:rotate-6 transition-transform`}>
+          <Icon className="w-6 h-6 stroke-[2.5]" />
         </div>
       </div>
+
+      {/* Main value display */}
+      <div className="my-2">
+        <h3 className={computedValueClass} title={typeof value === 'string' ? value : undefined}>
+          {value || '0'}
+        </h3>
+      </div>
+
+      {/* Subtitle tag */}
+      {subtitle && (
+        <div className="mt-3 pt-3 border-t-2 border-black/10 dark:border-white/10">
+          <span className="font-mono-code text-xs text-black/80 dark:text-gray-400 font-bold bg-black/5 dark:bg-white/10 px-2.5 py-1 rounded-md border border-black/10 dark:border-white/10 inline-block">
+            {subtitle}
+          </span>
+        </div>
+      )}
+
     </div>
   );
 }

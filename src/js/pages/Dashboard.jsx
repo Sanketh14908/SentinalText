@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, FileText, AlertTriangle, Flag, Loader2 } from 'lucide-react';
+import { FileText, AlertTriangle, Flag, Loader2, Activity, Zap } from 'lucide-react';
 import StatCard from '../components/StatCard';
 
 export default function Dashboard() {
@@ -11,7 +11,7 @@ export default function Dashboard() {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem('token');
-        const API_URL = import.meta.env.VITE_API_URL;
+        const API_URL = import.meta.env.VITE_API_URL || '';
         const response = await fetch(`${API_URL}/api/analyses/stats`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -37,82 +37,142 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-500" />
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <Loader2 className="w-12 h-12 animate-spin text-[#ff007f] stroke-[3]" />
+        <span className="font-bungee text-sm tracking-wider uppercase">LOADING TELEMETRY...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-20 text-rose-500">
-        {error}
+      <div className="max-w-md mx-auto my-16 p-6 bg-[#ff007f] text-white border-3 border-black rounded-2xl shadow-brutal text-center font-space font-black">
+        <AlertTriangle className="w-8 h-8 mx-auto mb-2 stroke-[2.5]" />
+        <p className="text-sm">{error}</p>
       </div>
     );
   }
 
-  const maxRisk = stats.trend ? Math.max(...stats.trend.map(d => d.riskScore), 1) : 1;
+  const maxRisk = stats?.trend ? Math.max(...stats.trend.map(d => d.riskScore), 1) : 1;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-      <div className="flex items-center gap-3 mb-10">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center">
-          <LayoutDashboard className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full">
+      
+      {/* Dashboard Header Banner */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-[#00f0ff] text-black font-mono-code text-xs font-black px-2 py-0.5 rounded border border-black shadow-[2px_2px_0px_#000] rotate-[-1deg]">
+              🛰️ THREAT RADAR v3.0
+            </span>
+            <span className="bg-[#00ff66] text-black font-space text-xs font-extrabold px-2 py-0.5 rounded border border-black rotate-[2deg]">
+              ● LIVE TELEMETRY
+            </span>
+          </div>
+          <h1 className="font-syne font-black text-3xl sm:text-5xl text-black dark:text-white uppercase tracking-tight">
+            YOUR SECURITY DOSSIER
+          </h1>
         </div>
-        <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">
-          Your Dashboard
-        </h1>
+
+        <div className="flex items-center gap-2">
+          <div className="bg-[#ffe600] text-black font-space font-black text-xs uppercase px-3.5 py-2 rounded-xl border-2 border-black shadow-brutal-sm flex items-center gap-2">
+            <Zap className="w-4 h-4 fill-black" />
+            <span>SHIELD: MAXIMUM</span>
+          </div>
+        </div>
       </div>
 
+      {/* Grid of Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
         <StatCard 
-          title="Total Analyzed" 
-          value={stats.total} 
+          title="Total Messages Analyzed" 
+          value={stats?.total ?? 0} 
           icon={FileText}
+          subtitle="All scans recorded"
         />
         <StatCard 
-          title="Flagged as Risky" 
-          value={`${stats.flaggedPercent}%`} 
+          title="Flagged As Risky" 
+          value={`${stats?.flaggedPercent ?? 0}%`} 
           icon={AlertTriangle}
+          subtitle="Threat ratio detected"
         />
         <StatCard 
-          title="Common Red Flag" 
-          value={stats.commonRedFlag || 'None detected'} 
-          subtitle="Frequent in risky texts"
+          title="Top Red Flag Trend" 
+          value={stats?.commonRedFlag || 'None detected'} 
+          subtitle="Most recurrent scam tactic"
           icon={Flag}
-          valueClassName="text-sm sm:text-base font-semibold text-slate-900 dark:text-white/95 leading-snug line-clamp-3"
+          valueClassName="text-sm sm:text-base font-space font-black text-black dark:text-white leading-snug line-clamp-3"
         />
       </div>
 
-      <div className="bg-white dark:bg-white/10 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-slate-200/80 dark:border-white/10 hover:shadow-md dark:hover:shadow-[0_16px_48px_rgba(0,0,0,0.3)] transition-all duration-300">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-8">
-          Risk Trend (Last 7 Days)
-        </h3>
+      {/* 7-Day Trend Graph Window */}
+      <div className="bg-white dark:bg-[#121212] border-3 border-black dark:border-white rounded-3xl shadow-brutal-xl overflow-hidden transition-colors duration-200">
         
-        <div className="h-64 flex items-end justify-between gap-2 sm:gap-4 pt-4">
-          {stats.trend && stats.trend.map((data, index) => {
-            const heightPercent = maxRisk > 0 ? (data.riskScore / maxRisk) * 100 : 0;
-            
-            return (
-              <div key={index} className="flex flex-col items-center flex-1 group h-full justify-end">
-                <div className="relative w-full flex justify-center h-[200px] items-end pb-2">
-                  <div className="opacity-0 group-hover:opacity-100 absolute -top-10 bg-slate-900 border border-slate-700 text-white text-xs px-3 py-1.5 rounded-lg transition-opacity whitespace-nowrap z-10 shadow-xl">
-                    {data.riskScore} risky msgs
-                  </div>
-                  <div 
-                    className="w-full max-w-[3rem] bg-gradient-to-t from-indigo-500/70 to-indigo-600/90 dark:from-indigo-900/50 dark:to-indigo-500/80 group-hover:to-cyan-500 dark:group-hover:to-cyan-400/80 rounded-t-lg transition-all duration-500 relative border-t border-x border-slate-200/50 dark:border-white/10 shadow-sm dark:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
-                    style={{ height: `${Math.max(heightPercent, 5)}%` }}
-                  >
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-slate-600 dark:text-slate-400 mt-2 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                  {data.day}
-                </span>
-              </div>
-            );
-          })}
+        {/* Terminal Header */}
+        <div className="bg-black text-white px-5 py-3 border-b-3 border-black dark:border-white flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-[#00ff66]" />
+            <span className="font-mono-code text-xs font-black uppercase tracking-wider text-[#00ff66]">
+              [ 7_DAY_RISK_SPECTRUM.DAT ]
+            </span>
+          </div>
+          <span className="font-mono-code text-[11px] text-[#ffe600] font-bold">
+            TIMELINE: RECENT WEEK
+          </span>
         </div>
+
+        <div className="p-6 sm:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="font-syne font-black text-xl text-black dark:text-white uppercase tracking-tight">
+                RISK INCIDENCE OVER TIME
+              </h3>
+              <p className="font-space text-xs font-bold text-black/60 dark:text-gray-400 mt-1">
+                Visualizing risky messages and phishing traps caught each day
+              </p>
+            </div>
+            <span className="font-bungee text-xs bg-[#ff007f] text-white px-2.5 py-1 rounded-lg border-2 border-black rotate-[-2deg] shadow-[2px_2px_0px_#000]">
+              7 DAYS
+            </span>
+          </div>
+          
+          {/* Chart Bars */}
+          <div className="h-64 flex items-end justify-between gap-2 sm:gap-4 pt-6 pb-2 border-b-2 border-black dark:border-white/20">
+            {stats?.trend && stats.trend.map((data, index) => {
+              const heightPercent = maxRisk > 0 ? (data.riskScore / maxRisk) * 100 : 0;
+              
+              return (
+                <div key={index} className="flex flex-col items-center flex-1 group h-full justify-end">
+                  <div className="relative w-full flex justify-center h-[200px] items-end pb-1">
+                    {/* Tooltip on hover */}
+                    <div className="opacity-0 group-hover:opacity-100 absolute -top-12 bg-black text-[#00ff66] border-2 border-black font-mono-code text-xs px-2.5 py-1 rounded-lg transition-opacity whitespace-nowrap z-20 shadow-[3px_3px_0px_#000] pointer-events-none">
+                      ⚠️ {data.riskScore} RISKY MSGS
+                    </div>
+                    {/* Bar element with brutalist styling */}
+                    <div 
+                      className="w-full max-w-[3.5rem] bg-[#ffe600] group-hover:bg-[#ff007f] rounded-t-xl transition-all duration-200 relative border-2 border-black shadow-[3px_0px_0px_#000]"
+                      style={{ height: `${Math.max(heightPercent, 8)}%` }}
+                    >
+                      <div className="w-full h-2 bg-black/20 rounded-t-lg"></div>
+                    </div>
+                  </div>
+                  <span className="font-space font-extrabold text-xs sm:text-sm text-black dark:text-gray-300 mt-3 group-hover:text-[#ff007f] transition-colors uppercase">
+                    {data.day}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs font-mono-code font-bold text-black/60 dark:text-gray-400">
+            <span>METRIC: DAILY FLAGGED SUSPECT MESSAGES</span>
+            <span className="text-[#00ff66]">✓ INTEL SYNCED</span>
+          </div>
+
+        </div>
+
       </div>
+
     </div>
   );
 }

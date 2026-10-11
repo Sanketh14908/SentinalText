@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { History as HistoryIcon, X, Loader2 } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Loader2, FolderArchive, ArrowUpRight } from 'lucide-react';
 import MessageHistoryItem from '../components/MessageHistoryItem';
-import AnalysisResultCard from '../components/AnalysisResultCard';
 
 export default function History() {
-  const [selectedItem, setSelectedItem] = useState(null);
+  const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,7 +13,7 @@ export default function History() {
     const fetchHistory = async () => {
       try {
         const token = localStorage.getItem('token');
-        const API_URL = import.meta.env.VITE_API_URL;
+        const API_URL = import.meta.env.VITE_API_URL || '';
         const response = await fetch(`${API_URL}/api/analyses`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -37,67 +37,78 @@ export default function History() {
     fetchHistory();
   }, []);
 
+  const handleSelectItem = (item) => {
+    navigate('/', { state: { selectedAnalysis: item } });
+  };
+
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex flex-col md:flex-row gap-8">
-      {/* History List */}
-      <div className={`flex-1 ${selectedItem ? 'hidden md:block' : 'block'}`}>
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 flex items-center justify-center">
-            <HistoryIcon className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full">
+      
+      {/* Header section */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-[#ff007f] text-white font-mono-code text-xs font-black px-2 py-0.5 rounded border border-black shadow-[2px_2px_0px_#000] rotate-[-1deg]">
+              📂 EVIDENCE VAULT
+            </span>
+            <span className="bg-[#ffe600] text-black font-space text-xs font-black px-2 py-0.5 rounded border border-black rotate-[2deg]">
+              {history.length} LOGGED SCANS
+            </span>
           </div>
-          <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">
-            Recent Analyses
+          <h1 className="font-syne font-black text-3xl sm:text-5xl text-black dark:text-white uppercase tracking-tight">
+            RECENT ANALYSES DOSSIER
           </h1>
         </div>
-        
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+
+        <Link
+          to="/"
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#00ff66] text-black font-bungee text-xs rounded-xl border-2 border-black shadow-brutal-sm btn-tactile"
+        >
+          <span>SCAN NEW TEXT</span>
+          <ArrowUpRight className="w-4 h-4 stroke-[3]" />
+        </Link>
+      </div>
+      
+      {/* List / Content Area */}
+      <div className="space-y-4">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 className="w-10 h-10 animate-spin text-[#ff007f] stroke-[3]" />
+            <span className="font-bungee text-xs uppercase">UNPACKING ARCHIVES...</span>
+          </div>
+        ) : error ? (
+          <div className="p-6 bg-[#ff007f] text-white border-3 border-black rounded-2xl font-space font-black text-center shadow-brutal">
+            {error}
+          </div>
+        ) : history.length === 0 ? (
+          <div className="bg-white dark:bg-[#121212] border-3 border-dashed border-black dark:border-white/50 rounded-3xl p-12 text-center shadow-brutal-sm">
+            <div className="w-16 h-16 bg-[#00f0ff] rounded-2xl border-2 border-black shadow-[3px_3px_0px_#000] flex items-center justify-center mx-auto mb-4 rotate-[-3deg]">
+              <FolderArchive className="w-8 h-8 text-black stroke-[2.5]" />
             </div>
-          ) : error ? (
-            <div className="text-center py-12 text-rose-500">
-              {error}
-            </div>
-          ) : history.length === 0 ? (
-            <div className="text-center py-12 text-slate-600 dark:text-slate-400 font-medium">
-              No analyses found. Go to the Analyzer to check a message.
-            </div>
-          ) : (
-            history.map((item) => (
-              <MessageHistoryItem 
-                key={item.id} 
-                item={item} 
-                onClick={setSelectedItem} 
-              />
-            ))
-          )}
-        </div>
+            <h3 className="font-syne font-black text-2xl text-black dark:text-white uppercase mb-2">
+              VAULT IS EMPTY
+            </h3>
+            <p className="font-space font-semibold text-sm text-black/70 dark:text-gray-400 max-w-sm mx-auto mb-6">
+              You haven't scanned any suspicious messages yet. Test out our AI scanner to populate your evidence locker!
+            </p>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#ffe600] text-black font-bungee text-xs rounded-2xl border-3 border-black shadow-brutal-yellow btn-tactile uppercase"
+            >
+              ⚡ SCAN YOUR FIRST MESSAGE ⚡
+            </Link>
+          </div>
+        ) : (
+          history.map((item) => (
+            <MessageHistoryItem 
+              key={item.id || item._id} 
+              item={item} 
+              onClick={() => handleSelectItem(item)} 
+            />
+          ))
+        )}
       </div>
 
-      {/* Selected Item Details */}
-      {selectedItem && (
-        <div className="w-full md:w-5/12 lg:w-1/2">
-          <div className="sticky top-24 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="flex items-center justify-between mb-4 md:hidden">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Analysis Details</h2>
-              <button 
-                onClick={() => setSelectedItem(null)}
-                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-white/10 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="bg-white dark:bg-white/5 backdrop-blur-md border border-slate-200/80 dark:border-white/10 p-5 rounded-2xl mb-6 shadow-sm dark:shadow-inner">
-              <p className="text-xs font-bold text-slate-600 dark:text-slate-500 mb-2 uppercase tracking-widest">Original Message</p>
-              <p className="text-slate-900 dark:text-slate-200 italic font-medium">"{selectedItem.message}"</p>
-            </div>
-
-            <AnalysisResultCard result={selectedItem} />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

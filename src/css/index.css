@@ -1,2 +1,250 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+  .font-syne {
+    font-family: 'Syne', sans-serif;
+  }
+  .font-space {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .font-marker {
+    font-family: 'Permanent Marker', cursive;
+  }
+  .font-bungee {
+    font-family: 'Bungee', cursive;
+  }
+  .font-mono-code {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Brutalist Hard Drop Shadows */
+.brutal-border {
+  border: 3px solid #000000;
+}
+.dark .brutal-border {
+  border: 3px solid #ffffff;
+}
+
+.brutal-border-colored {
+  border: 3px solid #000000;
+}
+.dark .brutal-border-colored {
+  border: 3px solid rgba(255, 255, 255, 0.85);
+}
+
+.shadow-brutal-sm {
+  box-shadow: 3px 3px 0px #000000;
+}
+.dark .shadow-brutal-sm {
+  box-shadow: 3px 3px 0px #00ff66;
+}
+
+.shadow-brutal {
+  box-shadow: 4px 4px 0px #000000;
+}
+.dark .shadow-brutal {
+  box-shadow: 4px 4px 0px #00f0ff;
+}
+
+.shadow-brutal-pink {
+  box-shadow: 5px 5px 0px #ff007f;
+}
+.dark .shadow-brutal-pink {
+  box-shadow: 5px 5px 0px #ff007f;
+}
+
+.shadow-brutal-lime {
+  box-shadow: 5px 5px 0px #00ff66;
+}
+.dark .shadow-brutal-lime {
+  box-shadow: 5px 5px 0px #00ff66;
+}
+
+.shadow-brutal-yellow {
+  box-shadow: 5px 5px 0px #ffe600;
+}
+.dark .shadow-brutal-yellow {
+  box-shadow: 5px 5px 0px #ffe600;
+}
+
+.shadow-brutal-cyan {
+  box-shadow: 5px 5px 0px #00f0ff;
+}
+.dark .shadow-brutal-cyan {
+  box-shadow: 5px 5px 0px #00f0ff;
+}
+
+.shadow-brutal-lg {
+  box-shadow: 6px 6px 0px #000000;
+}
+.dark .shadow-brutal-lg {
+  box-shadow: 6px 6px 0px #00ff66;
+}
+
+.shadow-brutal-xl {
+  box-shadow: 8px 8px 0px #000000;
+}
+.dark .shadow-brutal-xl {
+  box-shadow: 8px 8px 0px #ff007f;
+}
+
+/* Tactile Clickable Brutal Button */
+.btn-tactile {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-tactile:hover {
+  transform: translate(-2px, -2px);
+}
+.btn-tactile:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0px 0px 0px #000000 !important;
+}
+
+/* Sticker Hover */
+.sticker-pop {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sticker-pop:hover {
+  transform: scale(1.12) rotate(4deg);
+}
+
+/* Caution Stripes */
+.bg-caution-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    #ffe600,
+    #ffe600 12px,
+    #000000 12px,
+    #000000 24px
+  );
+}
+
+.bg-danger-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    #ff007f,
+    #ff007f 12px,
+    #000000 12px,
+    #000000 24px
+  );
+}
+
+/* Chaos Grid & Halftone Backgrounds */
+.bg-chaos-dots {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.15) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+.dark .bg-chaos-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+
+.bg-chaos-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+}
+.dark .bg-chaos-grid {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+}
+
+/* Marquee Keyframes */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.animate-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 24s linear infinite;
+}
+.animate-marquee-track:hover {
+  animation-play-state: paused;
+}
+
+.animate-marquee-track-fast {
+  display: flex;
+  width: max-content;
+  animation: marquee 16s linear infinite;
+}
+
+.animate-marquee-track-reverse {
+  display: flex;
+  width: max-content;
+  animation: marquee-reverse 22s linear infinite;
+}
+
+/* Jitter Animation */
+@keyframes jitter {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-2px, 1px) rotate(-1deg); }
+  50% { transform: translate(1px, -2px) rotate(1.5deg); }
+  75% { transform: translate(-1px, 2px) rotate(-0.5deg); }
+}
+
+.animate-jitter {
+  animation: jitter 0.28s infinite;
+}
+
+/* Floating Stickers */
+@keyframes sticker-float-1 {
+  0%, 100% { transform: translateY(0px) rotate(-4deg); }
+  50% { transform: translateY(-7px) rotate(-1deg); }
+}
+@keyframes sticker-float-2 {
+  0%, 100% { transform: translateY(0px) rotate(5deg); }
+  50% { transform: translateY(-9px) rotate(2deg); }
+}
+@keyframes sticker-float-3 {
+  0%, 100% { transform: translateY(0px) rotate(-2deg); }
+  50% { transform: translateY(-6px) rotate(3deg); }
+}
+
+.animate-float-1 {
+  animation: sticker-float-1 3.2s ease-in-out infinite;
+}
+.animate-float-2 {
+  animation: sticker-float-2 4s ease-in-out infinite 0.5s;
+}
+.animate-float-3 {
+  animation: sticker-float-3 3.6s ease-in-out infinite 1s;
+}
+
+/* Tape effect */
+.tape-badge {
+  position: relative;
+}
+.tape-badge::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 20%;
+  width: 60px;
+  height: 16px;
+  background-color: rgba(255, 230, 0, 0.7);
+  border: 1px dashed rgba(0, 0, 0, 0.3);
+  transform: rotate(-3deg);
+  pointer-events: none;
+  z-index: 10;
+}

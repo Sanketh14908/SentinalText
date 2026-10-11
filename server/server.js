@@ -2,11 +2,10 @@ require('dotenv').config();
 
 // ─── Startup env-var validation ───────────────────────────────────────────────
 // Fail fast: if any required variable is absent the server would start but
-// every request would blow up with a cryptic error.  Catch it here instead.
+// every request would blow up with a cryptic error. Catch it here instead.
 const REQUIRED_ENV = [
   'JWT_SECRET',
-  'SUPABASE_URL',
-  'SUPABASE_SERVICE_ROLE_KEY',
+  'MONGODB_URI',
   'GEMINI_API_KEY',
 ];
 
@@ -21,12 +20,16 @@ if (missingEnv.length > 0) {
 
 const express = require('express');
 const cors = require('cors');
+const connectDB = require('./utils/db');
 
 const authRoutes = require('./routes/auth');
 const analysesRoutes = require('./routes/analyses');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// ─── Connect to Database ───────────────────────────────────────────────────────
+connectDB();
 
 // ─── Core middleware ───────────────────────────────────────────────────────────
 // Allow all origins with full CORS headers — prevents preflight failures
@@ -46,7 +49,7 @@ app.use('/api', analysesRoutes);
 
 // Health check (registered before the error handler, after all routes)
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', database: 'mongodb' });
 });
 
 // Root endpoint: redirect browsers to frontend, or return API status JSON
@@ -57,6 +60,7 @@ app.get('/', (req, res) => {
   res.json({
     name: 'SentinelText API Server',
     status: 'running',
+    database: 'mongodb',
     healthCheck: '/api/health',
     frontend: 'http://localhost:5173',
   });

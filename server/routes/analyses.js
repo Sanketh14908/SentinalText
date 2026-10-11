@@ -1,7 +1,8 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { z } = require('zod');
 const { GoogleGenAI } = require('@google/genai');
-const supabase = require('../utils/supabase');
+const Analysis = require('../models/Analysis');
 const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
@@ -15,12 +16,10 @@ const analyzeSchema = z.object({
     .transform((v) => v.trim()),
 });
 
-// The allowed categories Gemini may return.  Used for validation below.
+// The allowed categories Gemini may return. Used for validation below.
 const ALLOWED_CATEGORIES = new Set(['legitimate', 'spam', 'phishing', 'spoofing']);
 
 // ─── Gemini client ────────────────────────────────────────────────────────────
-// Instantiated once at module load.  The API key is guaranteed to be present
-// because server.js validates all env vars before requiring any route files.
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const SYSTEM_INSTRUCTION = `You are a phishing and social engineering detection assistant.
@@ -43,8 +42,6 @@ Guidelines:
 - Be thorough and accurate. This is a real security tool used by real people.`;
 
 // ─── Helper: safe text extraction from Gemini response ────────────────────────
-// In @google/genai v2 response.text is a getter that can throw when the model
-// returns a safety block or an empty parts array.  Wrap it explicitly.
 function extractText(response) {
   try {
     return response.text ?? null;
@@ -56,7 +53,6 @@ function extractText(response) {
 // ─── Helper: strip markdown fences from Gemini output ─────────────────────────
 function stripFences(str) {
   str = str.trim();
-  // Handle ```json ... ``` and ``` ... ```
   if (str.startsWith('```')) {
     str = str.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
   }
@@ -70,7 +66,6 @@ router.post('/analyze', authMiddleware, async (req, res) => {
     const { message } = analyzeSchema.parse(req.body);
 
     // 2. Call Gemini with automatic fallback across available models
-    //    Tries models in priority order, cascading on transient 503/429/404 errors.
     const GEMINI_MODELS = [
       'gemini-3.1-flash-lite',
       'gemini-3.5-flash-lite',
@@ -106,7 +101,7 @@ router.post('/analyze', authMiddleware, async (req, res) => {
       return res.status(status).json({ error: msg });
     }
 
-    // 3. Extract text — response.text getter can throw on safety blocks
+    // 3. Extract text
     const rawText = extractText(geminiResponse);
     if (!rawText) {
       console.error('Gemini returned empty/blocked response');
@@ -115,10 +110,10 @@ router.post('/analyze', authMiddleware, async (req, res) => {
       });
     }
 
-    // 4. Strip any markdown fences the model added despite instructions
+    // 4. Strip any markdown fences
     const jsonStr = stripFences(rawText);
 
-    // 5. Parse JSON — wrapped in try/catch so a non-JSON response returns 502
+    // 5. Parse JSON
     let parsed;
     try {
       parsed = JSON.parse(jsonStr);
@@ -129,7 +124,7 @@ router.post('/analyze', authMiddleware, async (req, res) => {
       });
     }
 
-    // 6. Validate every required field with specific messages
+    // 6. Validate every required field
     if (typeof parsed.risk_score !== 'number' || isNaN(parsed.risk_score)) {
       console.error('Gemini: risk_score missing or not a number', parsed);
       return res.status(502).json({ error: 'AI returned invalid data (risk_score). Please try again.' });
@@ -147,46 +142,30 @@ router.post('/analyze', authMiddleware, async (req, res) => {
       return res.status(502).json({ error: 'AI returned invalid data (explanation). Please try again.' });
     }
 
-    // 7. Sanitise values before writing to DB
+    // 7. Sanitise values
     const risk_score = Math.max(0, Math.min(100, Math.round(parsed.risk_score)));
-    const category = parsed.category;            // already validated as one of 4 strings
-    const red_flags = parsed.red_flags.slice(0, 5).map(String); // at most 5, all strings
+    const category = parsed.category;
+    const red_flags = parsed.red_flags.slice(0, 5).map(String);
     const explanation = parsed.explanation.trim();
 
-    // 8. Persist to Supabase — always filter by req.userId
-    let savedAnalysis, dbError;
+    // 8. Persist to MongoDB
+    let savedAnalysis;
     try {
-      const dbResult = await supabase
-        .from('analyses')
-        .insert([{
-          user_id: req.userId,
-          message_content: message,
-          risk_score,
-          category,
-          red_flags,
-          explanation,
-        }])
-        .select()
-        .single();
-      savedAnalysis = dbResult.data;
-      dbError = dbResult.error;
+      savedAnalysis = await Analysis.create({
+        user_id: req.userId,
+        message_content: message,
+        risk_score,
+        category,
+        red_flags,
+        explanation,
+      });
     } catch (dbErr) {
       console.error('[DB ERROR]', dbErr);
       return res.status(500).json({ error: 'Failed to save analysis. Please try again.' });
     }
 
-    if (dbError) {
-      console.error('[DB ERROR]', dbError);
-      return res.status(500).json({ error: 'Failed to save analysis. Please try again.' });
-    }
-
-    if (!savedAnalysis) {
-      console.error('Supabase insert: no data returned');
-      return res.status(500).json({ error: 'Failed to save analysis. Please try again.' });
-    }
-
-    // 9. Normalise response (add .message alias for frontend compatibility)
-    return res.status(201).json({ ...savedAnalysis, message: savedAnalysis.message_content });
+    // 9. Return JSON object with compatible fields
+    return res.status(201).json(savedAnalysis.toJSON());
   } catch (err) {
     if (err instanceof z.ZodError) {
       return res.status(400).json({ error: err.errors[0]?.message || 'Invalid input' });
@@ -197,29 +176,17 @@ router.post('/analyze', authMiddleware, async (req, res) => {
 });
 
 // ─── GET /api/analyses/stats ──────────────────────────────────────────────────
-// IMPORTANT: this route MUST be declared before /analyses/:id so Express does
-// not treat the literal string "stats" as a dynamic :id parameter.
 router.get('/analyses/stats', authMiddleware, async (req, res) => {
   try {
-    const { data: analyses, error } = await supabase
-      .from('analyses')
-      .select('risk_score, category, red_flags, created_at')
-      .eq('user_id', req.userId)                   // always scoped to the requesting user
-      .order('created_at', { ascending: true });
+    const analyses = await Analysis.find({ user_id: req.userId }).sort({ created_at: 1 });
 
-    if (error) {
-      console.error('Stats DB error:', error);
-      return res.status(500).json({ error: 'Failed to fetch stats.' });
-    }
-
-    // No analyses yet — return clean zeroed values, no division-by-zero risk
+    // No analyses yet — return clean zeroed values
     if (!analyses || analyses.length === 0) {
       return res.json({ total: 0, flaggedPercent: 0, commonRedFlag: null, trend: [] });
     }
 
     const total = analyses.length;
     const flagged = analyses.filter((a) => a.category !== 'legitimate').length;
-    // total > 0 guaranteed here — no division-by-zero
     const flaggedPercent = Math.round((flagged / total) * 100);
 
     // Most common red flag across all analyses
@@ -251,7 +218,7 @@ router.get('/analyses/stats', authMiddleware, async (req, res) => {
     const trendMap = {};
     for (const a of analyses) {
       const d = new Date(a.created_at);
-      if (isNaN(d.getTime())) continue; // guard against invalid dates in DB
+      if (isNaN(d.getTime())) continue;
       if (d >= sevenDaysAgo) {
         const dateStr = d.toISOString().split('T')[0];
         trendMap[dateStr] = (trendMap[dateStr] || 0) + 1;
@@ -261,7 +228,6 @@ router.get('/analyses/stats', authMiddleware, async (req, res) => {
     const trend = Object.entries(trendMap)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, count]) => ({
-        // Use noon UTC to avoid timezone-boundary issues with toLocaleDateString
         day: new Date(date + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short' }),
         riskScore: count,
       }));
@@ -276,22 +242,8 @@ router.get('/analyses/stats', authMiddleware, async (req, res) => {
 // ─── GET /api/analyses ────────────────────────────────────────────────────────
 router.get('/analyses', authMiddleware, async (req, res) => {
   try {
-    const { data: analyses, error } = await supabase
-      .from('analyses')
-      .select('*')
-      .eq('user_id', req.userId)                   // scoped to requesting user
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Get analyses DB error:', error);
-      return res.status(500).json({ error: 'Failed to fetch analyses.' });
-    }
-
-    // Supabase returns [] not null for empty result sets, but guard anyway
-    const rows = analyses ?? [];
-
-    const formatted = rows.map((a) => ({ ...a, message: a.message_content }));
-    return res.json(formatted);
+    const analyses = await Analysis.find({ user_id: req.userId }).sort({ created_at: -1 });
+    return res.json(analyses.map((a) => a.toJSON()));
   } catch (err) {
     console.error('Get analyses unhandled error:', err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -303,41 +255,21 @@ router.delete('/analyses/:id', authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Validate id is present and looks like a UUID (basic check)
-    if (!id || typeof id !== 'string' || id.trim() === '') {
+    // Validate that id is a valid 24-character hexadecimal MongoDB ObjectId
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ error: 'Invalid analysis id' });
     }
 
-    // Step 1: Check whether the record exists at all (without user filter)
-    // so we can return the correct status code:
-    //   • 404 — record doesn't exist
-    //   • 403 — record exists but belongs to a different user
-    //   • 200 — record exists and belongs to this user → delete it
-    const { data: existing, error: fetchError } = await supabase
-      .from('analyses')
-      .select('id, user_id')
-      .eq('id', id)
-      .single();
-
-    if (fetchError || !existing) {
+    const existing = await Analysis.findById(id);
+    if (!existing) {
       return res.status(404).json({ error: 'Analysis not found' });
     }
 
-    if (existing.user_id !== req.userId) {
+    if (existing.user_id.toString() !== req.userId) {
       return res.status(403).json({ error: 'You do not have permission to delete this analysis' });
     }
 
-    // Step 2: Delete — both filters are redundant here but kept as defence-in-depth
-    const { error: deleteError } = await supabase
-      .from('analyses')
-      .delete()
-      .eq('id', id)
-      .eq('user_id', req.userId);
-
-    if (deleteError) {
-      console.error('Delete DB error:', deleteError);
-      return res.status(500).json({ error: 'Failed to delete analysis.' });
-    }
+    await Analysis.findByIdAndDelete(id);
 
     return res.json({ success: true });
   } catch (err) {

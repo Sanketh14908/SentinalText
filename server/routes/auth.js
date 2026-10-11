@@ -4,10 +4,12 @@ const jwt = require('jsonwebtoken');
 const { z } = require('zod');
 const dns = require('dns');
 const { promisify } = require('util');
+const { OAuth2Client } = require('google-auth-library');
 const resolveMx = promisify(dns.resolveMx);
-const supabase = require('../utils/supabase');
+const User = require('../models/User');
 
 const router = express.Router();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ─── Validation schema (shared between signup and login) ──────────────────────
 const authSchema = z.object({
@@ -62,37 +64,35 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ error: msg });
     }
 
+    // Check if account already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ error: 'An account with this email already exists.' });
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user — email is already lowercased by Zod transform
-    const { data: user, error: insertError } = await supabase
-      .from('users')
-      .insert([{ email, password_hash: hashedPassword }])
-      .select('id, email')
-      .single();
+    // Insert user into MongoDB
+    const user = await User.create({
+      email,
+      password_hash: hashedPassword,
+      auth_provider: 'local',
+    });
 
-    if (insertError) {
-      // Postgres unique-violation code — email already registered
-      if (insertError.code === '23505') {
-        return res.status(409).json({ error: 'An account with this email already exists.' });
-      }
-      // Any other DB error is a server fault
-      console.error('Signup DB error:', insertError);
-      return res.status(500).json({ error: 'Failed to create account. Please try again.' });
-    }
+    // Sign JWT with the user's MongoDB ObjectId as string
+    const token = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
-    if (!user) {
-      // Supabase returned no error but also no row — should never happen, but guard anyway
-      console.error('Signup: insert returned no user and no error');
-      return res.status(500).json({ error: 'Failed to create account. Please try again.' });
-    }
-
-    // Sign JWT with the same secret and payload field used in auth middleware
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
-    return res.status(201).json({ token, user: { id: user.id, email: user.email } });
+    return res.status(201).json({
+      token,
+      user: { id: user._id.toString(), email: user.email },
+    });
   } catch (err) {
+    if (err.code === 11000) {
+      return res.status(409).json({ error: 'An account with this email already exists.' });
+    }
     if (err instanceof z.ZodError) {
       // Return the first human-readable message instead of a raw array
       const message = err.errors?.[0]?.message || 'Invalid input';
@@ -114,21 +114,21 @@ router.post('/login', async (req, res) => {
     // signup — the DB lookup will find the right row regardless of casing.
     const { email, password } = authSchema.parse(req.body);
 
-    // Fetch user by normalised email
-    const { data: user, error: fetchError } = await supabase
-      .from('users')
-      .select('id, email, password_hash')
-      .eq('email', email)
-      .single();
+    // Fetch user by normalised email from MongoDB
+    const user = await User.findOne({ email });
 
-    if (fetchError || !user) {
+    if (!user) {
       // Don't reveal whether the email exists — use a generic message
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     if (!user.password_hash) {
-      // Guard: row exists but has no password hash — data integrity issue
-      console.error('Login: user row has no password_hash', user.id);
+      if (user.auth_provider === 'google') {
+        return res.status(400).json({
+          error: 'This account was created with Google. Please use "Sign in with Google".',
+        });
+      }
+      console.error('Login: user document has no password_hash', user._id);
       return res.status(500).json({ error: 'Account error. Please contact support.' });
     }
 
@@ -138,9 +138,14 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
 
-    return res.json({ token, user: { id: user.id, email: user.email } });
+    return res.json({
+      token,
+      user: { id: user._id.toString(), email: user.email, name: user.name, picture: user.picture },
+    });
   } catch (err) {
     if (err instanceof z.ZodError) {
       const message = err.errors?.[0]?.message || 'Invalid input';
@@ -152,6 +157,122 @@ router.post('/login', async (req, res) => {
     }
     console.error('Login error:', err);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ─── POST /api/auth/google ────────────────────────────────────────────────────
+router.post('/google', async (req, res) => {
+  try {
+    const { credential, accessToken, demoUser } = req.body;
+
+    if (!credential && !accessToken && !demoUser) {
+      return res.status(400).json({ error: 'Google credential or access token is required' });
+    }
+
+    let email, googleId, name, picture;
+
+    if (demoUser && (!process.env.GOOGLE_CLIENT_ID || process.env.NODE_ENV !== 'production')) {
+      email = demoUser.email?.toLowerCase().trim();
+      googleId = demoUser.sub || 'google_demo_id';
+      name = demoUser.name || 'Demo Google User';
+      picture = demoUser.picture || '';
+    } else if (credential) {
+      // 1. Verify Google ID token from Google Identity Services
+      let payload;
+      try {
+        const ticket = await googleClient.verifyIdToken({
+          idToken: credential,
+          audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        payload = ticket.getPayload();
+      } catch (verifyErr) {
+        // Fallback to Google TokenInfo endpoint
+        try {
+          const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+          if (!verifyRes.ok) {
+            throw new Error('Token verification failed');
+          }
+          payload = await verifyRes.json();
+        } catch (fallbackErr) {
+          console.error('Google token verification failed:', verifyErr.message);
+          return res.status(401).json({ error: 'Invalid Google credential token' });
+        }
+      }
+
+      if (!payload || !payload.email) {
+        return res.status(400).json({ error: 'Could not retrieve email from Google account' });
+      }
+
+      email = payload.email.toLowerCase().trim();
+      googleId = payload.sub;
+      name = payload.name || '';
+      picture = payload.picture || '';
+    } else if (accessToken) {
+      // 2. Verify with Google OAuth2 userinfo endpoint
+      const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!userinfoRes.ok) {
+        return res.status(401).json({ error: 'Invalid Google access token' });
+      }
+      const data = await userinfoRes.json();
+      email = data.email?.toLowerCase().trim();
+      googleId = data.sub;
+      name = data.name || '';
+      picture = data.picture || '';
+    }
+
+    if (!email) {
+      return res.status(400).json({ error: 'Unable to get email from Google account' });
+    }
+
+    // Find or create user in MongoDB Atlas
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        email,
+        google_id: googleId,
+        auth_provider: 'google',
+        name,
+        picture,
+      });
+    } else {
+      let modified = false;
+      if (!user.google_id) {
+        user.google_id = googleId;
+        modified = true;
+      }
+      if (name && !user.name) {
+        user.name = name;
+        modified = true;
+      }
+      if (picture && !user.picture) {
+        user.picture = picture;
+        modified = true;
+      }
+      if (modified) {
+        await user.save();
+      }
+    }
+
+    // Sign JWT session token
+    const token = jwt.sign({ userId: user._id.toString() }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    return res.json({
+      token,
+      user: {
+        id: user._id.toString(),
+        email: user.email,
+        name: user.name,
+        picture: user.picture,
+      },
+    });
+  } catch (err) {
+    console.error('Google Auth route error:', err);
+    return res.status(500).json({ error: 'Failed to authenticate with Google. Please try again.' });
   }
 });
 
