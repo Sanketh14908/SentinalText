@@ -56,26 +56,26 @@ export default function Dashboard() {
   const maxRisk = stats?.trend ? Math.max(...stats.trend.map(d => d.riskScore), 1) : 1;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full">
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8 w-full">
       
       {/* Dashboard Header Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-[#00f0ff] text-black font-mono-code text-xs font-black px-2 py-0.5 rounded border border-black shadow-[2px_2px_0px_#000] rotate-[-1deg]">
+            <span className="bg-[#00f0ff] text-black font-mono-code text-[11px] sm:text-xs font-black px-2 py-0.5 rounded border border-black shadow-[2px_2px_0px_#000] rotate-[-1deg]">
               🛰️ THREAT RADAR v3.0
             </span>
-            <span className="bg-[#00ff66] text-black font-space text-xs font-extrabold px-2 py-0.5 rounded border border-black rotate-[2deg]">
+            <span className="bg-[#00ff66] text-black font-space text-[11px] sm:text-xs font-extrabold px-2 py-0.5 rounded border border-black rotate-[2deg]">
               ● LIVE TELEMETRY
             </span>
           </div>
-          <h1 className="font-syne font-black text-3xl sm:text-5xl text-black dark:text-white uppercase tracking-tight">
+          <h1 className="font-syne font-black text-2xl sm:text-5xl text-black dark:text-white uppercase tracking-tight break-words">
             YOUR SECURITY DOSSIER
           </h1>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="bg-[#ffe600] text-black font-space font-black text-xs uppercase px-3.5 py-2 rounded-xl border-2 border-black shadow-brutal-sm flex items-center gap-2">
+          <div className="bg-[#ffe600] text-black font-space font-black text-xs uppercase px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border-2 border-black shadow-brutal-sm flex items-center gap-2">
             <Zap className="w-4 h-4 fill-black" />
             <span>SHIELD: MAXIMUM</span>
           </div>
@@ -83,7 +83,7 @@ export default function Dashboard() {
       </div>
 
       {/* Grid of Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
         <StatCard 
           title="Total Messages Analyzed" 
           value={stats?.total ?? 0} 
@@ -106,38 +106,38 @@ export default function Dashboard() {
       </div>
 
       {/* 7-Day Trend Graph Window */}
-      <div className="bg-white dark:bg-[#121212] border-3 border-black dark:border-white rounded-3xl shadow-brutal-xl overflow-hidden transition-colors duration-200">
+      <div className="bg-white dark:bg-[#121212] border-2 sm:border-3 border-black dark:border-white rounded-2xl sm:rounded-3xl shadow-brutal-xl overflow-hidden transition-colors duration-200">
         
         {/* Terminal Header */}
-        <div className="bg-black text-white px-5 py-3 border-b-3 border-black dark:border-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-[#00ff66]" />
-            <span className="font-mono-code text-xs font-black uppercase tracking-wider text-[#00ff66]">
+        <div className="bg-black text-white px-3 sm:px-5 py-2.5 sm:py-3 border-b-2 sm:border-b-3 border-black dark:border-white flex items-center justify-between">
+          <div className="flex items-center gap-2 min-w-0">
+            <Activity className="w-4 h-4 text-[#00ff66] shrink-0" />
+            <span className="font-mono-code text-[11px] sm:text-xs font-black uppercase tracking-wider text-[#00ff66] truncate">
               [ 7_DAY_RISK_SPECTRUM.DAT ]
             </span>
           </div>
-          <span className="font-mono-code text-[11px] text-[#ffe600] font-bold">
-            TIMELINE: RECENT WEEK
+          <span className="font-mono-code text-[10px] sm:text-[11px] text-[#ffe600] font-bold shrink-0">
+            RECENT WEEK
           </span>
         </div>
 
-        <div className="p-6 sm:p-8">
+        <div className="p-4 sm:p-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-syne font-black text-xl text-black dark:text-white uppercase tracking-tight">
+              <h3 className="font-syne font-black text-lg sm:text-xl text-black dark:text-white uppercase tracking-tight">
                 RISK INCIDENCE OVER TIME
               </h3>
               <p className="font-space text-xs font-bold text-black/60 dark:text-gray-400 mt-1">
                 Visualizing risky messages and phishing traps caught each day
               </p>
             </div>
-            <span className="font-bungee text-xs bg-[#ff007f] text-white px-2.5 py-1 rounded-lg border-2 border-black rotate-[-2deg] shadow-[2px_2px_0px_#000]">
+            <span className="font-bungee text-[10px] sm:text-xs bg-[#ff007f] text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border-2 border-black rotate-[-2deg] shadow-[2px_2px_0px_#000]">
               7 DAYS
             </span>
           </div>
           
           {/* Chart Bars */}
-          <div className="h-64 flex items-end justify-between gap-2 sm:gap-4 pt-6 pb-2 border-b-2 border-black dark:border-white/20">
+          <div className="h-56 sm:h-64 flex items-end justify-between gap-1 sm:gap-4 pt-6 pb-2 border-b-2 border-black dark:border-white/20">
             {stats?.trend && stats.trend.map((data, index) => {
               const heightPercent = maxRisk > 0 ? (data.riskScore / maxRisk) * 100 : 0;
               

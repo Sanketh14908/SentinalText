@@ -93,61 +93,61 @@ export default function Analyzer() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full">
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8 w-full">
       
       {/* Gen-Z Chaos Hero Banner */}
-      <div className="mb-10 text-center relative">
+      <div className="mb-8 sm:mb-10 text-center relative">
         
         {/* Floating Playful Badges */}
-        <div className="flex flex-wrap items-center justify-center gap-2.5 mb-4">
-          <span className="bg-[#ff007f] text-white px-3 py-1 font-bungee text-xs rounded-lg border-2 border-black shadow-[2px_2px_0px_#000] rotate-[-2deg] sticker-pop">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5 mb-3 sm:mb-4">
+          <span className="bg-[#ff007f] text-white px-2.5 sm:px-3 py-1 font-bungee text-[11px] sm:text-xs rounded-lg border-2 border-black shadow-[2px_2px_0px_#000] rotate-[-2deg] sticker-pop">
             🔥 100% UNHINGED
           </span>
-          <span className="bg-[#ffe600] text-black px-3 py-1 font-space font-black text-xs uppercase rounded-lg border-2 border-black shadow-[2px_2px_0px_#000] rotate-[1.5deg] sticker-pop">
+          <span className="bg-[#ffe600] text-black px-2.5 sm:px-3 py-1 font-space font-black text-[11px] sm:text-xs uppercase rounded-lg border-2 border-black shadow-[2px_2px_0px_#000] rotate-[1.5deg] sticker-pop">
             👁️ VIBE CHECK ENGINE
           </span>
-          <span className="bg-[#00ff66] text-black px-3 py-1 font-mono-code font-black text-xs rounded-lg border-2 border-black shadow-[2px_2px_0px_#000] rotate-[-1deg] sticker-pop">
+          <span className="bg-[#00ff66] text-black px-2.5 sm:px-3 py-1 font-mono-code font-black text-[11px] sm:text-xs rounded-lg border-2 border-black shadow-[2px_2px_0px_#000] rotate-[-1deg] sticker-pop">
             ⚡ SCAMMER BOUNCER
           </span>
         </div>
 
-        <h1 className="font-syne font-black text-4xl sm:text-6xl md:text-7xl uppercase tracking-tighter text-black dark:text-white leading-none mb-3">
-          DON'T GET <span className="bg-[#ff007f] text-white px-2 py-0.5 rounded-lg border-3 border-black inline-block rotate-[1deg] shadow-[4px_4px_0px_#000]">COOKED</span> BESTIE
+        <h1 className="font-syne font-black text-3xl sm:text-6xl md:text-7xl uppercase tracking-tighter text-black dark:text-white leading-tight sm:leading-none mb-3 break-words">
+          DON'T GET <span className="bg-[#ff007f] text-white px-2 py-0.5 rounded-lg border-2 sm:border-3 border-black inline-block rotate-[1deg] shadow-[3px_3px_0px_#000] sm:shadow-[4px_4px_0px_#000]">COOKED</span> BESTIE
         </h1>
 
-        <p className="font-space font-bold text-sm sm:text-base text-black/80 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="font-space font-bold text-xs sm:text-base text-black/80 dark:text-gray-300 max-w-2xl mx-auto px-1">
           Feed any sketchy SMS, fake bank alert, phishing DM, or sus email link to our sentinel neural net. We check red flags in real-time. No cap.
         </p>
       </div>
 
       {/* Main Analyzer Terminal Box */}
-      <div className="bg-white dark:bg-[#121212] border-3 border-black dark:border-white rounded-3xl shadow-brutal-xl overflow-hidden mb-8 transition-colors duration-200">
+      <div className="bg-white dark:bg-[#121212] border-2 sm:border-3 border-black dark:border-white rounded-2xl sm:rounded-3xl shadow-brutal-xl overflow-hidden mb-8 transition-colors duration-200">
         
         {/* Terminal Window Header Bar */}
-        <div className="bg-black text-white px-5 py-3 border-b-3 border-black dark:border-white flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex gap-1.5">
-              <span className="w-3.5 h-3.5 rounded-full bg-[#ff007f] border border-black inline-block"></span>
-              <span className="w-3.5 h-3.5 rounded-full bg-[#ffe600] border border-black inline-block"></span>
-              <span className="w-3.5 h-3.5 rounded-full bg-[#00ff66] border border-black inline-block"></span>
+        <div className="bg-black text-white px-3 sm:px-5 py-2.5 sm:py-3 border-b-2 sm:border-b-3 border-black dark:border-white flex items-center justify-between">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="flex gap-1.5 shrink-0">
+              <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#ff007f] border border-black inline-block"></span>
+              <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#ffe600] border border-black inline-block"></span>
+              <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#00ff66] border border-black inline-block"></span>
             </div>
-            <span className="font-mono-code text-xs font-bold text-[#00f0ff] uppercase tracking-wide">
-              SENTINEL_INPUT_TERMINAL // REALTIME_SCAN.IO
+            <span className="font-mono-code text-[11px] sm:text-xs font-bold text-[#00f0ff] uppercase tracking-wide truncate">
+              <span className="hidden sm:inline">SENTINEL_INPUT_TERMINAL // </span>REALTIME_SCAN.IO
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="font-mono-code text-[11px] bg-[#00ff66] text-black px-2 py-0.5 rounded font-black">
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="font-mono-code text-[10px] sm:text-[11px] bg-[#00ff66] text-black px-2 py-0.5 rounded font-black">
               ● READY
             </span>
           </div>
         </div>
 
         {/* Quick Sample Presets Bar */}
-        <div className="bg-[#fff9e6] dark:bg-[#181818] p-3 border-b-2 border-black dark:border-white/20 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="font-space font-black text-xs uppercase tracking-wider text-black dark:text-white shrink-0 flex items-center gap-1">
+        <div className="bg-[#fff9e6] dark:bg-[#181818] p-2.5 sm:p-3 border-b-2 border-black dark:border-white/20 flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <span className="font-space font-black text-[11px] sm:text-xs uppercase tracking-wider text-black dark:text-white shrink-0 flex items-center gap-1">
             <Zap className="w-3.5 h-3.5 text-[#ff007f]" />
-            QUICK SAMPLES:
+            SAMPLES:
           </span>
           {SAMPLE_PRESETS.map((preset, idx) => (
             <button
@@ -161,11 +161,11 @@ export default function Analyzer() {
         </div>
 
         {/* Text Input Area */}
-        <div className="p-5 sm:p-6">
+        <div className="p-4 sm:p-6">
           <div className="relative">
             <textarea
-              rows={6}
-              className="w-full p-4 sm:p-5 bg-[#fafafa] dark:bg-[#070707] border-2 border-black dark:border-white rounded-2xl font-mono-code text-sm sm:text-base text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-4 focus:ring-[#00f0ff] transition-all resize-none shadow-inner"
+              rows={5}
+              className="w-full p-3.5 sm:p-5 bg-[#fafafa] dark:bg-[#070707] border-2 border-black dark:border-white rounded-xl sm:rounded-2xl font-mono-code text-base text-black dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus:outline-none focus:ring-4 focus:ring-[#00f0ff] transition-all resize-none shadow-inner"
               placeholder='Paste a suspicious message here (e.g. "Urgent: Your account is locked! Click here...")...'
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -174,7 +174,7 @@ export default function Analyzer() {
             {text && (
               <button
                 onClick={() => setText('')}
-                className="absolute top-4 right-4 p-1.5 bg-black text-white hover:bg-[#ff007f] rounded-lg transition-colors border border-black shadow-[2px_2px_0px_#000]"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 p-1.5 bg-black text-white hover:bg-[#ff007f] rounded-lg transition-colors border border-black shadow-[2px_2px_0px_#000]"
                 title="Clear input"
               >
                 <Trash2 className="w-4 h-4" />
@@ -182,7 +182,7 @@ export default function Analyzer() {
             )}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 mt-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mt-3 pt-2">
             <div className="flex items-center gap-2 text-xs font-mono-code font-bold text-black/70 dark:text-gray-400">
               <span className="bg-black/5 dark:bg-white/10 px-2 py-1 rounded border border-black/20 dark:border-white/20">
                 CHARACTERS: {text.length}
@@ -196,7 +196,7 @@ export default function Analyzer() {
             <button
               onClick={handleAnalyze}
               disabled={!text.trim() || isAnalyzing}
-              className="group flex items-center gap-2.5 px-6 sm:px-8 py-3.5 bg-[#00ff66] hover:bg-[#00e65c] text-black font-bungee text-sm sm:text-base rounded-2xl border-3 border-black shadow-brutal-lime btn-tactile disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-wider"
+              className="w-full sm:w-auto justify-center group flex items-center gap-2.5 px-6 sm:px-8 py-3.5 bg-[#00ff66] hover:bg-[#00e65c] text-black font-bungee text-sm sm:text-base rounded-xl sm:rounded-2xl border-2 sm:border-3 border-black shadow-brutal-lime btn-tactile disabled:opacity-40 disabled:cursor-not-allowed uppercase tracking-wider"
             >
               {isAnalyzing ? (
                 <Loader2 className="w-5 h-5 animate-spin stroke-[3]" />
@@ -208,7 +208,7 @@ export default function Analyzer() {
           </div>
 
           {error && (
-            <div className="mt-4 p-4 bg-[#ff007f] text-white border-2 border-black rounded-xl font-space font-black text-sm shadow-brutal-sm flex items-center gap-3">
+            <div className="mt-4 p-3.5 sm:p-4 bg-[#ff007f] text-white border-2 border-black rounded-xl font-space font-black text-xs sm:text-sm shadow-brutal-sm flex items-center gap-3">
               <AlertOctagon className="w-5 h-5 shrink-0" />
               <span>{error}</span>
             </div>

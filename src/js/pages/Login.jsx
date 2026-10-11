@@ -166,7 +166,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-10 relative">
+    <div className="flex-1 flex items-center justify-center px-3 sm:px-6 py-6 sm:py-10 relative">
       
       {/* Decorative Stickers */}
       <div className="hidden sm:block absolute top-12 left-10 animate-float-1 z-10 pointer-events-none">
@@ -182,27 +182,27 @@ export default function Login() {
       </div>
 
       {/* Main Container Card */}
-      <div className="max-w-md w-full bg-white dark:bg-[#121212] border-3 border-black dark:border-white rounded-3xl shadow-brutal-xl overflow-hidden transition-colors duration-200 relative z-20">
+      <div className="max-w-md w-full bg-white dark:bg-[#121212] border-2 sm:border-3 border-black dark:border-white rounded-2xl sm:rounded-3xl shadow-brutal-xl overflow-hidden transition-colors duration-200 relative z-20">
         
         {/* Window Chrome Header Bar */}
-        <div className="bg-black text-white px-5 py-3 border-b-3 border-black dark:border-white flex items-center justify-between">
+        <div className="bg-black text-white px-3 sm:px-5 py-2.5 sm:py-3 border-b-2 sm:border-b-3 border-black dark:border-white flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex gap-1.5">
               <span className="w-3 h-3 rounded-full bg-[#ff007f] border border-black inline-block"></span>
               <span className="w-3 h-3 rounded-full bg-[#ffe600] border border-black inline-block"></span>
               <span className="w-3 h-3 rounded-full bg-[#00ff66] border border-black inline-block"></span>
             </div>
-            <span className="font-mono-code text-xs font-black text-[#00ff66] uppercase tracking-wide">
+            <span className="font-mono-code text-[11px] sm:text-xs font-black text-[#00ff66] uppercase tracking-wide">
               [ AUTH_GATEWAY.EXE ]
             </span>
           </div>
 
-          <span className="font-mono-code text-[11px] bg-[#ff007f] text-white px-2 py-0.5 rounded font-black">
+          <span className="font-mono-code text-[10px] sm:text-[11px] bg-[#ff007f] text-white px-2 py-0.5 rounded font-black">
             SSL_OK
           </span>
         </div>
 
-        <div className="p-6 sm:p-8">
+        <div className="p-4 sm:p-8">
           
           {/* Card Title & Icon */}
           <div className="text-center mb-6">

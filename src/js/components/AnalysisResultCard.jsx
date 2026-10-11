@@ -24,24 +24,24 @@ export default function AnalysisResultCard({ result }) {
   };
 
   return (
-    <div className="relative bg-white dark:bg-[#121212] border-3 border-black dark:border-white rounded-3xl shadow-brutal-xl overflow-hidden transition-all duration-200">
+    <div className="relative bg-white dark:bg-[#121212] border-2 sm:border-3 border-black dark:border-white rounded-2xl sm:rounded-3xl shadow-brutal-xl overflow-hidden transition-all duration-200">
       
       {/* Retro Window Title Bar */}
-      <div className="bg-black text-white px-5 py-3 border-b-3 border-black dark:border-white flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex gap-1.5">
-            <span className="w-3.5 h-3.5 rounded-full bg-[#ff007f] border border-black inline-block"></span>
-            <span className="w-3.5 h-3.5 rounded-full bg-[#ffe600] border border-black inline-block"></span>
-            <span className="w-3.5 h-3.5 rounded-full bg-[#00ff66] border border-black inline-block"></span>
+      <div className="bg-black text-white px-3 sm:px-5 py-2.5 sm:py-3 border-b-2 sm:border-b-3 border-black dark:border-white flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div className="flex gap-1.5 shrink-0">
+            <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#ff007f] border border-black inline-block"></span>
+            <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#ffe600] border border-black inline-block"></span>
+            <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-[#00ff66] border border-black inline-block"></span>
           </div>
-          <span className="font-mono-code text-xs font-black tracking-wider uppercase text-[#00ff66]">
+          <span className="font-mono-code text-[11px] sm:text-xs font-black tracking-wider uppercase text-[#00ff66] truncate">
             [ VERDICT_REPORT_v3.exe ]
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="font-mono-code text-[11px] bg-[#222] text-[#00f0ff] px-2 py-0.5 rounded border border-[#444] font-bold">
-            CONFIDENCE: 99.4%
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="font-mono-code text-[10px] sm:text-[11px] bg-[#222] text-[#00f0ff] px-2 py-0.5 rounded border border-[#444] font-bold">
+            <span className="hidden xs:inline">CONFIDENCE: </span>99.4%
           </span>
         </div>
       </div>
@@ -51,13 +51,13 @@ export default function AnalysisResultCard({ result }) {
         <div className="bg-danger-stripes h-2.5 w-full border-b-2 border-black"></div>
       )}
 
-      <div className="p-6 sm:p-8">
+      <div className="p-4 sm:p-8">
         
         {/* Header section with RiskBadge + Sticker */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="w-full sm:w-auto">
             <div className="flex items-center gap-2 mb-2">
-              <span className="font-mono-code text-xs font-black uppercase tracking-widest text-[#ff007f] dark:text-[#00ff66] bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 rounded">
+              <span className="font-mono-code text-[10px] sm:text-xs font-black uppercase tracking-widest text-[#ff007f] dark:text-[#00ff66] bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 rounded">
                 // SYSTEM ASSESSMENT
               </span>
               <span className="font-marker text-xs text-black dark:text-white rotate-[-3deg]">
@@ -70,7 +70,7 @@ export default function AnalysisResultCard({ result }) {
           {/* Quick Copy Verdict Sticker Button */}
           <button
             onClick={handleCopyVerdict}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#ffe600] text-black font-space font-black text-xs uppercase tracking-wider rounded-xl border-2 border-black shadow-brutal-sm btn-tactile hover:bg-[#00f0ff]"
+            className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 bg-[#ffe600] text-black font-space font-black text-xs uppercase tracking-wider rounded-xl border-2 border-black shadow-brutal-sm btn-tactile hover:bg-[#00f0ff]"
           >
             {copied ? <Check className="w-4 h-4 stroke-[3]" /> : <Copy className="w-4 h-4 stroke-[3]" />}
             {copied ? 'COPIED TO CLIPBOARD!' : 'COPY REPORT'}

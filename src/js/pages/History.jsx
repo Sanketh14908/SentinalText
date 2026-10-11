@@ -42,27 +42,27 @@ export default function History() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full">
+    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8 w-full">
       
       {/* Header section */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 sm:mb-8">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="bg-[#ff007f] text-white font-mono-code text-xs font-black px-2 py-0.5 rounded border border-black shadow-[2px_2px_0px_#000] rotate-[-1deg]">
+            <span className="bg-[#ff007f] text-white font-mono-code text-[11px] sm:text-xs font-black px-2 py-0.5 rounded border border-black shadow-[2px_2px_0px_#000] rotate-[-1deg]">
               📂 EVIDENCE VAULT
             </span>
-            <span className="bg-[#ffe600] text-black font-space text-xs font-black px-2 py-0.5 rounded border border-black rotate-[2deg]">
+            <span className="bg-[#ffe600] text-black font-space text-[11px] sm:text-xs font-black px-2 py-0.5 rounded border border-black rotate-[2deg]">
               {history.length} LOGGED SCANS
             </span>
           </div>
-          <h1 className="font-syne font-black text-3xl sm:text-5xl text-black dark:text-white uppercase tracking-tight">
+          <h1 className="font-syne font-black text-2xl sm:text-5xl text-black dark:text-white uppercase tracking-tight break-words">
             RECENT ANALYSES DOSSIER
           </h1>
         </div>
 
         <Link
           to="/"
-          className="flex items-center gap-2 px-4 py-2.5 bg-[#00ff66] text-black font-bungee text-xs rounded-xl border-2 border-black shadow-brutal-sm btn-tactile"
+          className="w-full sm:w-auto justify-center flex items-center gap-2 px-4 py-2.5 bg-[#00ff66] text-black font-bungee text-xs rounded-xl border-2 border-black shadow-brutal-sm btn-tactile"
         >
           <span>SCAN NEW TEXT</span>
           <ArrowUpRight className="w-4 h-4 stroke-[3]" />

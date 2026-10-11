@@ -19,6 +19,18 @@
   }
 }
 
+/* Global Viewport Containment */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-text-size-adjust: 100%;
+}
+
 /* Custom Scrollbar */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -248,3 +260,50 @@
   pointer-events: none;
   z-index: 10;
 }
+
+/* Mobile Phone Viewport & Shadow Optimization (<= 640px) */
+@media (max-width: 640px) {
+  /* Prevent horizontal offset clip while preserving brutalist style */
+  .shadow-brutal-xl {
+    box-shadow: 4px 4px 0px #000000;
+  }
+  .dark .shadow-brutal-xl {
+    box-shadow: 4px 4px 0px #ff007f;
+  }
+  .shadow-brutal-lg {
+    box-shadow: 3px 3px 0px #000000;
+  }
+  .dark .shadow-brutal-lg {
+    box-shadow: 3px 3px 0px #00ff66;
+  }
+  .shadow-brutal {
+    box-shadow: 3px 3px 0px #000000;
+  }
+  .dark .shadow-brutal {
+    box-shadow: 3px 3px 0px #00f0ff;
+  }
+  .shadow-brutal-pink {
+    box-shadow: 3px 3px 0px #ff007f;
+  }
+  .shadow-brutal-lime {
+    box-shadow: 3px 3px 0px #00ff66;
+  }
+  .shadow-brutal-yellow {
+    box-shadow: 3px 3px 0px #ffe600;
+  }
+  .shadow-brutal-cyan {
+    box-shadow: 3px 3px 0px #00f0ff;
+  }
+
+  /* Prevent mobile Safari & Chrome from auto-zooming into inputs */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Keep hero headings and text nicely constrained */
+  h1, h2, h3 {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+}
+

@@ -65,9 +65,9 @@ export default function RiskBadge({ category, score }) {
     const offset = circumference - (Math.min(Math.max(score, 0), 100) / 100) * circumference;
 
     return (
-      <div className={`inline-flex items-center gap-4 px-5 py-3.5 rounded-2xl ${config.bg} border-3 border-black shadow-brutal transition-transform duration-200 hover:rotate-1`}>
+      <div className={`w-full sm:w-auto inline-flex items-center gap-3 sm:gap-4 px-3.5 sm:px-5 py-2.5 sm:py-3.5 rounded-2xl ${config.bg} border-2 sm:border-3 border-black shadow-brutal transition-transform duration-200 hover:rotate-1`}>
         {/* Gauge circle */}
-        <div className="relative w-14 h-14 flex items-center justify-center shrink-0 bg-black rounded-xl border-2 border-black p-1 shadow-inner">
+        <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center shrink-0 bg-black rounded-xl border-2 border-black p-1 shadow-inner">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 52 52">
             <circle
               cx="26"
@@ -91,23 +91,23 @@ export default function RiskBadge({ category, score }) {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
-            <span className="font-syne font-black text-sm leading-none">{score}%</span>
+            <span className="font-syne font-black text-xs sm:text-sm leading-none">{score}%</span>
           </div>
         </div>
 
         {/* Text information */}
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1.5">
-            <span className="text-lg">{config.emoji}</span>
-            <span className="font-bungee text-sm sm:text-base tracking-wide leading-tight">
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+            <span className="text-base sm:text-lg">{config.emoji}</span>
+            <span className="font-bungee text-xs sm:text-base tracking-wide leading-tight truncate">
               {config.label}
             </span>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="font-mono-code text-[11px] font-black uppercase bg-black text-white px-2 py-0.5 rounded border border-black tracking-wider">
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-1 flex-wrap">
+            <span className="font-mono-code text-[10px] sm:text-[11px] font-black uppercase bg-black text-white px-1.5 sm:px-2 py-0.5 rounded border border-black tracking-wider">
               {config.verdict}
             </span>
-            <span className="font-space text-xs font-black uppercase opacity-90">
+            <span className="font-space text-[11px] sm:text-xs font-black uppercase opacity-90">
               RISK: {score}/100
             </span>
           </div>
